@@ -24,4 +24,4 @@ fn main() -> Result<()> {
 }
 
     user_iter.collect()
-}
+
