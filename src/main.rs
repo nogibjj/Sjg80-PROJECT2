@@ -1,42 +1,27 @@
-use rusqlite::{Connection, NO_PARAMS};
+use rusqlite::{Connection, Result};
 
-fn main() {
-    let conn = Connection::open("my_database.db").expect("Failed to open database");
-    
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL
-        )",
-        [],
-    )
-    .expect("Failed to create table");
+fn main() -> Result<()> {
+    let connection = Connection::open("database.sqlite3")?;
+
+    // Create a table
+    connection.execute("CREATE TABLE IF NOT EXISTS users (name TEXT, age INTEGER)", [])?;
+
+    // Insert a new user
+    connection.execute("INSERT INTO users VALUES ('Alice', 42)", [])?;
+
+    // Read a user
+    let mut user = connection.query_row("SELECT * FROM users WHERE name = ?", ["Alice"])?;
+    let name = user.get::<_, String>(0)?;
+    let age = user.get::<_, i32>(1)?;
+
+    // Update a user
+    connection.execute("UPDATE users SET age = 43 WHERE name = ?", ["Alice"])?;
+
+    // Delete a user
+    connection.execute("DELETE FROM users WHERE name = ?", ["Alice"])?;
+
+    Ok(())
 }
-
-#[derive(Debug)]
-struct User {
-    id: i32,
-    name: String,
-    email: String,
-}
-
-fn create_user(conn: &Connection, name: &str, email: &str) -> rusqlite::Result<usize> {
-    conn.execute(
-        "INSERT INTO users (name, email) VALUES (?, ?)",
-        &[name, email],
-    )
-}
-
-fn read_users(conn: &Connection) -> rusqlite::Result<Vec<User>> {
-    let mut stmt = conn.prepare("SELECT id, name, email FROM users")?;
-    let user_iter = stmt.query_map(NO_PARAMS, |row| {
-        Ok(User {
-            id: row.get(0)?,
-            name: row.get(1)?,
-            email: row.get(2)?,
-        })
-    })?;
 
     user_iter.collect()
 }
