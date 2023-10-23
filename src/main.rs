@@ -1,4 +1,3 @@
-use rusqlite::Connection;
 use rusqlite::{Connection, NO_PARAMS};
 
 fn main() {
