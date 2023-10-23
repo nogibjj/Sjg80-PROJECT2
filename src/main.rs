@@ -23,5 +23,5 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-    user_iter.collect()
+    user_iter.collect("Alice")
 
